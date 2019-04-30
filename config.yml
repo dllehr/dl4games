@@ -1,0 +1,41 @@
+
+templates:
+  default:
+    width: 256
+    height: 240
+    crop:
+      top: 0
+      bottom: 0
+      left: 0
+      right: 0
+    load_model: false
+    data_dir: "E:\\training"
+    window_handle: "Mesen"
+
+  rad:
+      width: 256
+      height: 240
+      crop:
+        top: 0
+        bottom: 60
+        left: 0
+        right: 0
+      num_files: 51
+      data_dir: "E:\\training"
+      window_handle: "Mesen"
+
+  rc:
+    width: 256
+    height: 240
+    crop:
+      top: 0
+      bottom: 0
+      left: 0
+      right: 0
+    num_files: 51
+    data_dir: "E:\\training"
+    window_handle: "Mesen"
+
+
+
+
