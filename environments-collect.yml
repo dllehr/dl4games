@@ -1,0 +1,9 @@
+name: collect
+channels:
+    - https://conda.anaconda.org/menpo
+    - conda-forge
+
+dependencies:
+    - numpy==1.16.1
+    - menpo::opencv
+    - pyyaml
