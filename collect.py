@@ -162,7 +162,7 @@ def main():
 
             if len(training_data) % 100 == 0:
                 print(len(training_data))
-                
+
                 if len(training_data) == 500 and not debug:
                     file_name = '{}-{}.npy'.format(target_name, starting_value)
                     np.save(file_name,training_data)
