@@ -9,7 +9,7 @@ templates:
       left: 0
       right: 0
     load_model: false
-    data_dir: "E:\\training"
+    data_dir: "/tmp/training"
     window_handle: "Mesen"
 
   rad:

@@ -1,17 +1,26 @@
 import numpy as np
-from grabscreen import grab_screen
 import argparse
 import cv2
 import time
-from getkeys import key_check
+
 import os
 import sys
 import utils
 import yaml
 import platform
+import matplotlib.pyplot as plt
+
 if platform.system() == "Windows":
+    from getkeys import key_check
+    from grabscreen import grab_screen    
     import winGuiAuto as wh
-import win32gui
+    import win32gui
+else:
+    import winLinux as wh
+    from linkeylisten import KeyListener
+    from grabscreenLinux import grab_screen
+    from lingetkeys import key_check
+
 
 w = np.array([1,0,0,0,0,0,0])
 s = np.array([0,1,0,0,0,0,0])
@@ -27,6 +36,8 @@ starting_value = 1
 # Required cropping to remove Windows handle and edges
 TOP_BORDER_SIZE=55
 EDGE_BORDER_SIZE=10
+paused=False
+quitting=False
 
 '''
 Remove the window edges and Menu from top before resizing
@@ -47,17 +58,17 @@ def keys_to_output(keys):
     [W, S, A, D, WA, WD, SA, SD, NOKEY] boolean values.
     '''
     output = np.array([0,0,0,0,0,0,0])
-    if 'W' in keys:
+    if 'w' in keys:
         output += w
-    if 'A' in keys:
+    if 'a' in keys:
         output += a
-    if 'S' in keys:
+    if 's' in keys:
         output += s
-    if 'D' in keys:
+    if 'd' in keys:
         output += d
-    if 'J' in keys:
+    if 'j' in keys:
         output += j
-    if 'K' in keys:
+    if 'k' in keys:
         output += k
 
     if(not np.count_nonzero(output)):
@@ -66,7 +77,31 @@ def keys_to_output(keys):
     #print(output)
     return output
 
+def key_pressed(kc):
+    return
+    #print ("Key pressed - keycode: %d" % kc)
+
+def key_released(kc):
+    return
+    #print ("Key released - keycode: %d" % kc)
+
+def toggle_pause():
+    global paused
+    if paused:
+        paused = False
+        print('unpaused!')
+        time.sleep(1)
+    else:
+        print('Pausing!')
+        paused = True
+        time.sleep(1)
+
+def quit():
+    global quitting
+    quitting=True
+    
 def main():
+    global paused, quitting
     print(platform.system())
     delim = "/" if os.name == "posix" else "\\"
     debug = False
@@ -100,11 +135,19 @@ def main():
    
     target_name = data_dir + delim + args.game_template
     starting_value=1
- 
+    recording_window="Slack"
+    print("RECORDING_WINDOW {}".format(recording_window))
     hwnd = wh.findTopWindow(recording_window)
-    rect = wh.GetWindowPlacement(hwnd)[-1]
+    #rect = wh.GetWindowPlacement(hwnd)[-1]
+    rect = wh.GetWindowPlacement(hwnd)
+    print("rect {}".format(rect))
 
     print("Template: {}".format(args.game_template))
+    if platform.system() != "Windows":
+        kl = KeyListener()
+        kl.register_pause(toggle_pause)
+        kl.register_quit(quit)
+        kl.start()
     #image = ImageGrab.grab(rect)
     while True:
     #file_name = 'training_data-{}.npy'.format(starting_value)
@@ -118,12 +161,11 @@ def main():
 
     starting_value = starting_value
     training_data = []
-    for i in list(range(4))[::-1]:
+    for i in list(range(2))[::-1]:
         print(i+1)
         time.sleep(1)
 
     last_time = time.time()
-    paused = False
     print('STARTING!!!')
     meta_info = dict(
         name = args.game_template,
@@ -134,33 +176,43 @@ def main():
         yaml.dump(meta_info, outfile, default_flow_style=False)
 
     while(True):
-        rect = remove_border(wh.GetWindowPlacement(hwnd)[-1])
+        #rect = remove_border(wh.GetWindowPlacement(hwnd))
+        rect = wh.GetWindowPlacement(hwnd)
+        #print("RECT PLACEMENT: {}".format(rect))
+        keys = key_check(kl)
+        last_time = time.time()
         if not paused:
+            before_grab_time = time.time()
             screen = grab_screen(region=rect)
-            last_time = time.time()
+            print('grab took {} seconds'.format(time.time()-before_grab_time))
+            
             # resize to something a bit more acceptable for a CNN
             screen = cv2.resize(screen, (width, height))
-            print("SHape of screen: " + str(screen.shape))
+            #print("SHape of screen: " + str(screen.shape))
             #print ("screen {}".format(screen))
             screen = screen[crop_top:height-crop_bottom, crop_left:width+crop_left]
             # run a color convert:
             screen = cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)
-            keys = key_check()
+            #keys = key_check(kl)
             output = keys_to_output(keys)
-            #if np.count_nonzero(output & d):
-            #    print("Found d key")
+            #print("output {}".format(output))
+                 #if np.count_nonzero(output & d):
+                    #    print("Found d key")
             training_data.append([screen,output])
 
-            #print('loop took {} seconds'.format(time.time()-last_time))
+            print('loop took {} seconds'.format(time.time()-last_time))
             last_time = time.time()
             #cv2.imshow('window',cv2.resize(screen,(640,360)))
             if(debug):
-                cv2.imshow('window',screen)
+                plt.ion()
+                fig, ax = plt.subplots()
+                ax.imshow('window',img)
                 if cv2.waitKey(25) & 0xFF == ord('q'):
                     cv2.destroyAllWindows()
                     break
 
             if len(training_data) % 100 == 0:
+                print('loop took {} seconds'.format(time.time()-last_time))
                 print(len(training_data))
 
                 if len(training_data) == 500 and not debug:
@@ -169,21 +221,9 @@ def main():
                     print('SAVED')
                     training_data = []
                     starting_value += 1
-                   
                     #file_name = 'X:/pygta5/phase7-larger-color/training_data-{}.npy'.format(starting_value)
-
-                    
-        keys = key_check()
-        if 'T' in keys:
-            if paused:
-                paused = False
-                print('unpaused!')
-                time.sleep(1)
-            else:
-                print('Pausing!')
-                paused = True
-                time.sleep(1)
-        if 'Q' in keys:
+        if quitting:
+            kl.exit()
             return
 
 

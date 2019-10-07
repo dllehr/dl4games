@@ -1,15 +1,17 @@
 # Citation: Box Of Hats (https://github.com/Box-Of-Hats )
 
-import win32api as wapi
+from showkey import ShowKey
 import time
 
-keyList = ["\b"]
-for char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ 123456789,.'£$/\\":
+keyList = []
+for char in "abcdefghijklmnopqrstuvwxyz 123456789,.'£$/\\":
     keyList.append(char)
 
-def key_check():
+def key_check(kl):
     keys = []
     for key in keyList:
-        if wapi.GetAsyncKeyState(ord(key)):
+        if kl.is_pressed(key):
             keys.append(key)
     return keys
+
+
