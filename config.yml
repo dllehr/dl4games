@@ -12,6 +12,18 @@ templates:
     data_dir: "E:\\training"
     window_handle: "Mesen"
 
+  web:
+    width: 256
+    height: 240
+    crop:
+      top: 0
+      bottom: 0
+      left: 0
+      right: 0
+    load_model: false
+    data_dir: "E:\\training"
+    window_handle: "Chrome"
+
   rad:
       width: 256
       height: 240
@@ -32,6 +44,18 @@ templates:
       bottom: 0
       left: 0
       right: 0
+    num_files: 51
+    data_dir: "E:\\training"
+    window_handle: "Mesen"
+
+  po:
+    width: 256
+    height: 240
+    crop:
+      top: 80
+      bottom: 40
+      left: 70
+      right: 70
     num_files: 51
     data_dir: "E:\\training"
     window_handle: "Mesen"

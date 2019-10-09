@@ -118,7 +118,7 @@ def main():
 
     starting_value = starting_value
     training_data = []
-    for i in list(range(4))[::-1]:
+    for i in list(range(2))[::-1]:
         print(i+1)
         time.sleep(1)
 
@@ -133,6 +133,7 @@ def main():
     with open('{}.meta'.format(target_name), 'w') as outfile:
         yaml.dump(meta_info, outfile, default_flow_style=False)
 
+    print("WINDOW PLACEMENT {}".format(wh.GetWindowPlacement(hwnd)))
     while(True):
         rect = remove_border(wh.GetWindowPlacement(hwnd)[-1])
         if not paused:
@@ -140,9 +141,9 @@ def main():
             last_time = time.time()
             # resize to something a bit more acceptable for a CNN
             screen = cv2.resize(screen, (width, height))
-            print("SHape of screen: " + str(screen.shape))
+            #print("SHape of screen: " + str(screen.shape))
             #print ("screen {}".format(screen))
-            screen = screen[crop_top:height-crop_bottom, crop_left:width+crop_left]
+            screen = screen[crop_top:height-crop_bottom, crop_left:width-crop_right]
             # run a color convert:
             screen = cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)
             keys = key_check()
@@ -172,7 +173,7 @@ def main():
                    
                     #file_name = 'X:/pygta5/phase7-larger-color/training_data-{}.npy'.format(starting_value)
 
-                    
+        time.sleep(0.05)
         keys = key_check()
         if 'T' in keys:
             if paused:
