@@ -21,7 +21,7 @@ import win32con
 import win32gui
 
 def GetWindowPlacement(hwnd):
-    return win32gui.GetWindowPlacement(hwnd)
+    return win32gui.GetWindowPlacement(hwnd)[-1]
 
 def findTopWindow(wantedText=None, wantedClass=None, selectionFunction=None):
     '''Find the hwnd of a top level window.

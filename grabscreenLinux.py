@@ -1,17 +1,20 @@
 import cv2
 import numpy as np
-import pyautogui
-
+import mss
 def grab_screen(region=None):
 
     if region:
             left,top,x2,y2 = region
             width = x2 - left + 1
             height = y2 - top + 1
-
+            monitor = {"top": top, "left": left, "width": width, "height": height}
+    with mss.mss() as sct:
     #print("REGION: {}".format((left, top, width, height)))
-    img = pyautogui.screenshot(region=(left, top, width, height))
-    #img.save(r"screenshot.png")
+    #img = sct.screenshot(region=(left, top, width, height))
+        #monitor = {"top": 40, "left": 0, "width": 800, "height": 640}
+        img = np.array(sct.grab(monitor))
+        
+        
     # hwindc = win32gui.GetWindowDC(hwin)
     # srcdc = win32ui.CreateDCFromHandle(hwindc)
     # memdc = srcdc.CreateCompatibleDC()

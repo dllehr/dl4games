@@ -2,20 +2,19 @@ import numpy as np
 import argparse
 import cv2
 import time
-
 import os
 import sys
 import utils
 import yaml
 import platform
-import matplotlib.pyplot as plt
 
 if platform.system() == "Windows":
-    from getkeys import key_check
-    from grabscreen import grab_screen    
-    import winGuiAuto as wh
+    from getkeysWindows import key_check
+    from grabscreenWindows import grab_screen
+    import winWindows as wh
     import win32gui
 else:
+    import mss
     import winLinux as wh
     from linkeylisten import KeyListener
     from grabscreenLinux import grab_screen
@@ -73,8 +72,6 @@ def keys_to_output(keys):
 
     if(not np.count_nonzero(output)):
         output = nk
-
-    #print(output)
     return output
 
 def key_pressed(kc):
@@ -99,7 +96,7 @@ def toggle_pause():
 def quit():
     global quitting
     quitting=True
-    
+
 def main():
     global paused, quitting
     print(platform.system())
@@ -135,7 +132,7 @@ def main():
    
     target_name = data_dir + delim + args.game_template
     starting_value=1
-    recording_window="Slack"
+    #recording_window="Slack"
     print("RECORDING_WINDOW {}".format(recording_window))
     hwnd = wh.findTopWindow(recording_window)
     #rect = wh.GetWindowPlacement(hwnd)[-1]
@@ -182,17 +179,17 @@ def main():
         keys = key_check(kl)
         last_time = time.time()
         if not paused:
-            before_grab_time = time.time()
             screen = grab_screen(region=rect)
-            print('grab took {} seconds'.format(time.time()-before_grab_time))
-            
+            #print('grab took {} seconds'.format(time.time()-before_grab_time))
+
             # resize to something a bit more acceptable for a CNN
             screen = cv2.resize(screen, (width, height))
             #print("SHape of screen: " + str(screen.shape))
             #print ("screen {}".format(screen))
-            screen = screen[crop_top:height-crop_bottom, crop_left:width+crop_left]
+            screen = screen[crop_top:height-crop_bottom, crop_left:width-crop_right]
             # run a color convert:
             screen = cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)
+            #cv2.imwrite('screenshot.png', screen)
             #keys = key_check(kl)
             output = keys_to_output(keys)
             #print("output {}".format(output))
@@ -200,7 +197,7 @@ def main():
                     #    print("Found d key")
             training_data.append([screen,output])
 
-            print('loop took {} seconds'.format(time.time()-last_time))
+            #print('loop took {} seconds'.format(time.time()-last_time))
             last_time = time.time()
             #cv2.imshow('window',cv2.resize(screen,(640,360)))
             if(debug):
@@ -222,6 +219,7 @@ def main():
                     training_data = []
                     starting_value += 1
                     #file_name = 'X:/pygta5/phase7-larger-color/training_data-{}.npy'.format(starting_value)
+        time.sleep(0.04)
         if quitting:
             kl.exit()
             return

@@ -1,6 +1,3 @@
-# Citation: Box Of Hats (https://github.com/Box-Of-Hats )
-
-from showkey import ShowKey
 import time
 
 keyList = []
@@ -13,5 +10,3 @@ def key_check(kl):
         if kl.is_pressed(key):
             keys.append(key)
     return keys
-
-

@@ -23,7 +23,7 @@ class KeyListener(threading.Thread):
         #print('{0} pressed'.format(
         #    key))
         self.keys_pressed.add("{}".format(key).strip('\''))
-        if "{}".format(key).strip('\'') == 't':
+        if "{}".format(key).strip('\'') == 'p':
             #print("KEYS PRESSED {}".format(self.keys_pressed))
             if(self.pause_listener):
                 self.pause_listener()
@@ -38,7 +38,10 @@ class KeyListener(threading.Thread):
         #print('{0} release'.format(
         #    key))
         #print("KEY REMOVE {}".format(self.keys_pressed))
-        self.keys_pressed.remove("{}".format(key).strip('\''))
+        try:
+            self.keys_pressed.remove("{}".format(key).strip('\''))
+        except:
+            None
         if key == Key.esc:
             # Stop listener
             return False
